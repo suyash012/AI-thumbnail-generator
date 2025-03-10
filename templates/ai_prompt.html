@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Thumbnail Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #FF0000; /* YouTube red */
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .input-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+        .preview-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #FF0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #cc0000;
+        }
+        .preview {
+            margin-top: 20px;
+        }
+        #imagePreview, #thumbnailPreview {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            display: none;
+            border-radius: 4px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 0, 0, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #FF0000;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .properties {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            display: none;
+        }
+        .property {
+            margin-bottom: 8px;
+        }
+        .property-name {
+            font-weight: bold;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #FF0000;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .button:hover {
+            background-color: #cc0000;
+        }
+        .rating {
+            font-size: 2em;
+            margin: 15px 0;
+        }
+        .star {
+            cursor: pointer;
+            color: #ccc;
+        }
+        .star:hover,
+        .star:hover ~ .star,
+        .star.selected,
+        .star.selected ~ .star {
+            color: #FFD700;
+        }
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        /* Add to your existing styles */
+        .enhance-button {
+            margin-top: 10px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            display: block;
+            width: auto;
+        }
+        
+        .enhance-button:hover {
+            background-color: #356ac3;
+        }
+        
+        #enhancedResult {
+            background-color: #f0f9ff;
+            border: 1px solid #bde5f8;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .loading-dots {
+            display: inline-block;
+        }
+        
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+    </style>
+</head>
+<body>
+    <h1>AI-Powered YouTube Thumbnail Generator</h1>
+    <p>Describe what you want and let our AI create the perfect thumbnail!</p>
+    
+    <div class="container">
+        <div class="input-panel">
+            <h2>Design Your Thumbnail</h2>
+            
+            <form id="thumbnailForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">Select an image:</label>
+                    <input type="file" id="file" name="file" accept="image/*" required onchange="previewImage(this)">
+                    <div class="preview">
+                        <img id="imagePreview" alt="Image Preview">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="prompt">Describe your perfect thumbnail:</label>
+                    <textarea id="prompt" name="prompt" placeholder="Example: I want a gaming thumbnail with my character and some text that says IMPOSSIBLE BOSS FIGHT"></textarea>
+                    <button type="button" id="enhancePromptBtn" class="enhance-button">✨ Enhance My Prompt with AI</button>
+                </div>
+                
+                <button type="button" onclick="generateThumbnail()">Generate AI Thumbnail</button>
+            </form>
+            
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+                <p>AI is thinking and creating your thumbnail...</p>
+            </div>
+        </div>
+        
+        <div class="preview-panel">
+            <h2>AI Generated Thumbnail</h2>
+            <div class="preview">
+                <img id="thumbnailPreview" alt="Generated Thumbnail">
+            </div>
+            
+            <div class="properties" id="thumbnailProperties">
+                <h3>AI Analysis & Decisions</h3>
+                <div id="propertiesList"></div>
+            </div>
+            
+            <div class="buttons" id="actionButtons" style="display: none;">
+                <a href="#" id="downloadButton" class="button" download>Download Thumbnail</a>
+                <a href="/ai-prompt" class="button">Create Another</a>
+            </div>
+
+            <div class="feedback-section" id="feedbackSection" style="display: none; margin-top: 20px;">
+                <h3>How would you rate this thumbnail?</h3>
+                <div class="rating">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">★</span>
+                    <span class="star" data-value="3">★</span>
+                    <span class="star" data-value="4">★</span>
+                    <span class="star" data-value="5">★</span>
+                </div>
+                <textarea id="feedbackText" placeholder="Any additional feedback? (optional)" style="width: 100%; margin-top: 10px; height: 80px;"></textarea>
+                <button id="submitFeedback" class="button" style="margin-top: 10px;">Submit Feedback</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        function generateThumbnail() {
+            const fileInput = document.getElementById('file');
+            const prompt = document.getElementById('prompt').value;
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Please select an image');
+                return;
+            }
+            
+            if (!prompt) {
+                alert('Please enter a description for your thumbnail');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('thumbnailPreview').style.display = 'none';
+            document.getElementById('thumbnailProperties').style.display = 'none';
+            document.getElementById('actionButtons').style.display = 'none';
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('prompt', prompt);
+            
+            // Send request
+            fetch('/generate-from-prompt', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading
+                document.getElementById('loadingIndicator').style.display = 'none';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                // Show thumbnail
+                const thumbnailPreview = document.getElementById('thumbnailPreview');
+                thumbnailPreview.src = data.thumbnail_image;
+                thumbnailPreview.style.display = 'block';
+                
+                // Update download link
+                document.getElementById('downloadButton').href = data.thumbnail_image;
+                
+                // Display properties
+                const propertiesList = document.getElementById('propertiesList');
+                propertiesList.innerHTML = '';
+                
+                // Format the properties in a user-friendly way
+                const properties = data.properties;
+                const propertyNames = {
+                    'style': 'Thumbnail Style',
+                    'tone': 'Emotional Tone',
+                    'visual_elements': 'Visual Elements',
+                    'color_scheme': 'Color Scheme',
+                    'content_focus': 'Content Focus',
+                    'faces_focus': 'Focusing on Faces',
+                    'text_overlay': 'Text Overlay'
+                };
+                
+                for (const [key, value] of Object.entries(properties)) {
+                    if (key !== 'raw_prompt' && value) {
+                        const div = document.createElement('div');
+                        div.className = 'property';
+                        
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'property-name';
+                        nameSpan.textContent = (propertyNames[key] || key) + ': ';
+                        
+                        const valueSpan = document.createElement('span');
+                        if (Array.isArray(value)) {
+                            valueSpan.textContent = value.join(', ');
+                        } else if (typeof value === 'boolean') {
+                            valueSpan.textContent = value ? 'Yes' : 'No';
+                        } else {
+                            valueSpan.textContent = value;
+                        }
+                        
+                        div.appendChild(nameSpan);
+                        div.appendChild(valueSpan);
+                        propertiesList.appendChild(div);
+                    }
+                }
+                
+                // Show properties and buttons
+                document.getElementById('thumbnailProperties').style.display = 'block';
+                document.getElementById('actionButtons').style.display = 'block';
+
+                // Store the thumbnail ID for feedback
+                window.currentThumbnailId = data.thumbnail_id;
+                
+                // Show feedback section
+                document.getElementById('feedbackSection').style.display = 'block';
+            })
+            .catch(error => {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                alert('An error occurred: ' + error);
+            });
+        }
+
+        // Initialize star rating system
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', function() {
+                let value = parseInt(this.getAttribute('data-value'));
+                
+                // Reset all stars
+                document.querySelectorAll('.star').forEach(s => s.classList.remove('selected'));
+                
+                // Select clicked star and all after it
+                document.querySelectorAll(`.star[data-value="${value}"], .star[data-value="${value}"] ~ .star`).forEach(s => {
+                    s.classList.add('selected');
+                });
+                
+                // Store the selected rating
+                window.selectedRating = value;
+            });
+        });
+
+        // Handle feedback submission
+        document.getElementById('submitFeedback').addEventListener('click', function() {
+            if (!window.selectedRating || !window.currentThumbnailId) {
+                alert('Please rate the thumbnail before submitting feedback');
+                return;
+            }
+            
+            const feedback = {
+                thumbnail_id: window.currentThumbnailId,
+                rating: window.selectedRating,
+                feedback: document.getElementById('feedbackText').value
+            };
+            
+            fetch('/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(feedback)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Thank you for your feedback!');
+                    // Hide the feedback section
+                    document.getElementById('feedbackSection').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting feedback:', error);
+                alert('Error submitting feedback. Please try again.');
+            });
+        });
+
+        // Add this to your existing script section
+        document.getElementById('enhancePromptBtn').addEventListener('click', function() {
+            const promptText = document.getElementById('prompt').value.trim();
+            
+            if (!promptText) {
+                alert('Please enter a basic description first before enhancing');
+                return;
+            }
+            
+            // Show loading state
+            this.innerHTML = 'Enhancing your prompt <span class="loading-dots"></span>';
+            this.disabled = true;
+            
+            // Send the basic prompt to be enhanced
+            fetch('/enhance-prompt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt: promptText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Reset button state
+                document.getElementById('enhancePromptBtn').innerHTML = '✨ Enhance My Prompt with AI';
+                document.getElementById('enhancePromptBtn').disabled = false;
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                // Update the textarea with the enhanced prompt
+                document.getElementById('prompt').value = data.enhanced_prompt;
+                
+                // Show a success message
+                const successAlert = document.createElement('div');
+                successAlert.className = 'alert alert-success';
+                successAlert.style.backgroundColor = '#dff0d8';
+                successAlert.style.color = '#3c763d';
+                successAlert.style.padding = '10px';
+                successAlert.style.marginTop = '10px';
+                successAlert.style.borderRadius = '4px';
+                successAlert.innerHTML = '✅ Prompt enhanced with AI optimization keywords!';
+                
+                // Insert the alert after the button
+                const buttonElement = document.getElementById('enhancePromptBtn');
+                buttonElement.parentNode.insertBefore(successAlert, buttonElement.nextSibling);
+                
+                // Remove the alert after 5 seconds
+                setTimeout(() => {
+                    successAlert.remove();
+                }, 5000);
+            })
+            .catch(error => {
+                document.getElementById('enhancePromptBtn').innerHTML = '✨ Enhance My Prompt with AI';
+                document.getElementById('enhancePromptBtn').disabled = false;
+                alert('An error occurred: ' + error);
+            });
+        });
+    </script>
+</body>
+</html>

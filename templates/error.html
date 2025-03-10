@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - YouTube Thumbnail Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #FF0000; /* YouTube red */
+        }
+        .error-message {
+            background-color: #ffeeee;
+            border: 1px solid #ffcccc;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #FF0000;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+        }
+        .button:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Error</h1>
+    <p>Something went wrong while generating your thumbnail.</p>
+    
+    <div class="error-message">
+        {{ error }}
+    </div>
+    
+    <a href="/" class="button">Try Again</a>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "Attractive Thumbnail",
+  "layout": {
+    "imagePosition": {"x": 0, "y": 0, "width": 1280, "height": 720},
+    "textAreas": [
+      {"id": "title", "x": 640, "y": 120, "width": 800, "align": "center", "fontSize": 80, "color": "#FFFFFF", "strokeWidth": 4, "strokeColor": "#000000"},
+      {"id": "subtitle", "x": 640, "y": 240, "width": 800, "align": "center", "fontSize": 60, "color": "#FFFFFF", "strokeWidth": 4, "strokeColor": "#000000"}
+    ],
+    "elements": [
+      {"type": "arrow", "x": 200, "y": 100, "rotation": 45, "color": "#FF0000", "size": 80},
+      {"type": "arrow", "x": 1080, "y": 620, "rotation": -45, "color": "#FF0000", "size": 80},
+      {"type": "overlay", "opacity": 0.3, "color": "#000000"}
+    ]
+  }
+}

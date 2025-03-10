@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Thumbnail - YouTube Thumbnail Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #FF0000; /* YouTube red */
+        }
+        .image-container {
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #FF0000;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generated Thumbnail</h1>
+    <p>Your YouTube thumbnail has been generated successfully!</p>
+    
+    <div class="image-container">
+        <h2>Original Image</h2>
+        <img src="{{ original_image }}" alt="Original Image">
+    </div>
+    
+    <div class="image-container">
+        <h2>Generated Thumbnail</h2>
+        <img src="{{ thumbnail_image }}" alt="Generated Thumbnail">
+    </div>
+    
+    <a href="{{ thumbnail_image }}" download class="button">Download Thumbnail</a>
+    <a href="/" class="button">Create Another Thumbnail</a>
+</body>
+</html>

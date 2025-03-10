@@ -1,0 +1,67 @@
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+ENV/
+env/
+
+# User uploaded content
+uploads/*
+!uploads/.gitkeep
+
+# Generated thumbnails
+output/thumbnails/*
+!output/thumbnails/.gitkeep
+
+# Database files
+data/thumbnails.db
+
+# Model files (may be large)
+models/enhancement_model/*
+!models/enhancement_model/.gitkeep
+models/style_transfer_model/*
+!models/style_transfer_model/.gitkeep
+
+# Downloaded fonts (keep structure but ignore font files)
+data/fonts/*.ttf
+data/fonts/*.otf
+!data/fonts/.gitkeep
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+logs/

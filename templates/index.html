@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Thumbnail Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #FF0000; /* YouTube red */
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"], input[type="text"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #FF0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #cc0000;
+        }
+        .preview {
+            margin-top: 20px;
+        }
+        #imagePreview {
+            max-width: 100%;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>YouTube Thumbnail Generator</h1>
+    <p>Create eye-catching thumbnails for your YouTube videos using AI.</p>
+    
+    <form action="/generate" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <p>Or try our <a href="/ai-prompt" style="color: #FF0000; font-weight: bold;">Advanced AI Prompt Interface</a> for more intelligent thumbnail generation!</p>
+        </div>
+        <div class="form-group">
+            <label for="file">Select an image:</label>
+            <input type="file" id="file" name="file" accept="image/*" required onchange="previewImage(this)">
+            <div class="preview">
+                <img id="imagePreview" alt="Image Preview">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="prompt">Describe your thumbnail:</label>
+            <textarea id="prompt" name="prompt" rows="3" placeholder="Example: Create a gaming thumbnail with shocked reaction, red arrows pointing to the character, and text saying 'IMPOSSIBLE CHALLENGE'"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="filter">Select a filter:</label>
+            <select id="filter" name="filter">
+                <option value="SHARPEN">Sharpen</option>
+                <option value="BLUR">Blur</option>
+                <option value="CONTOUR">Contour</option>
+                <option value="DETAIL">Detail</option>
+                <option value="EDGE_ENHANCE">Edge Enhance</option>
+                <option value="EMBOSS">Emboss</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="text">Add text to thumbnail (optional):</label>
+            <input type="text" id="text" name="text" placeholder="Enter your catchy text here">
+        </div>
+        
+        <div class="form-group">
+            <button type="button" id="analyzeBtn" onclick="analyzeImage()" disabled>Analyze with AI</button>
+            <div id="analysisResults" class="analysis-results" style="display:none;">
+                <h3>AI Analysis Results</h3>
+                <p id="faceDetection"></p>
+                <p id="textPlacement"></p>
+                <p id="imageQuality"></p>
+                <div id="previewContainer" style="margin-top: 15px;">
+                    <img id="analysisPreview" alt="Analysis Preview" style="max-width: 100%;">
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit">Generate Thumbnail</button>
+    </form>
+
+    <script>
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function analyzeImage() {
+            const fileInput = document.getElementById('file');
+            const resultsDiv = document.getElementById('analysisResults');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Please select an image first');
+                return;
+            }
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            // Show loading state
+            document.getElementById('analyzeBtn').innerText = 'Analyzing...';
+            document.getElementById('analyzeBtn').disabled = true;
+            
+            // Send analysis request
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Analysis error: ' + data.error);
+                    return;
+                }
+                
+                // Update UI with results
+                document.getElementById('faceDetection').innerHTML = 
+                    `<strong>Faces detected:</strong> ${data.faces_detected} ${data.faces_detected > 0 ? '✓' : '✗'}`;
+                
+                document.getElementById('textPlacement').innerHTML = 
+                    `<strong>Recommended text placement:</strong> ${data.optimal_text_placement}`;
+                
+                const brightnessQuality = data.brightness_level < 80 ? 'too dark' : 
+                                         data.brightness_level > 200 ? 'too bright' : 'good';
+                
+                const contrastQuality = data.contrast_level < 50 ? 'too flat' : 
+                                       data.contrast_level > 90 ? 'too harsh' : 'good';
+                
+                document.getElementById('imageQuality').innerHTML = 
+                    `<strong>Image quality:</strong> Brightness is ${brightnessQuality}, contrast is ${contrastQuality}`;
+                
+                // Show preview with analysis overlay
+                document.getElementById('analysisPreview').src = data.preview_image;
+                
+                // Show results
+                resultsDiv.style.display = 'block';
+                
+                // Reset button
+                document.getElementById('analyzeBtn').innerText = 'Analyze with AI';
+                document.getElementById('analyzeBtn').disabled = false;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during analysis');
+                document.getElementById('analyzeBtn').innerText = 'Analyze with AI';
+                document.getElementById('analyzeBtn').disabled = false;
+            });
+        }
+        
+        // Enable analyze button when image is selected
+        document.getElementById('file').addEventListener('change', function() {
+            document.getElementById('analyzeBtn').disabled = !this.files || !this.files[0];
+        });
+    </script>
+</body>
+</html>
